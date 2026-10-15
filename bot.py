@@ -13,7 +13,6 @@ G_REFRESH = os.environ.get("GOOGLE_REFRESH_TOKEN")
 PLAYLIST_ID = os.environ.get("YOUTUBE_PLAYLIST_ID")
 BASE_URL = os.environ.get("BASE_URL", "").rstrip("/")  # https://tu-app.onrender.com
 
-agregadas = set()  # evita duplicados mientras el servidor siga encendido
 
 
 # ---------- YouTube ----------
@@ -30,6 +29,38 @@ def yt_token():
     )
     r.raise_for_status()
     return r.json()["access_token"]
+
+
+def items_playlist(h):
+    """Devuelve [(video_id, titulo), ...] de la playlist completa."""
+    items, token = [], None
+    for _ in range(20):
+        params = {"part": "snippet", "playlistId": PLAYLIST_ID, "maxResults": 50}
+        if token:
+            params["pageToken"] = token
+        r = requests.get(
+            "https://www.googleapis.com/youtube/v3/playlistItems",
+            headers=h, params=params, timeout=15,
+        )
+        d = r.json()
+        for it in d.get("items", []):
+            sn = it["snippet"]
+            items.append((sn["resourceId"]["videoId"], sn["title"]))
+        token = d.get("nextPageToken")
+        if not token:
+            break
+    return items
+
+
+def lista():
+    h = {"Authorization": f"Bearer {yt_token()}"}
+    items = items_playlist(h)
+    link = f"https://www.youtube.com/playlist?list={PLAYLIST_ID}"
+    if not items:
+        return f"La playlist está vacía.\n{link}"
+    ultimas = [html.unescape(t) for _, t in items[-10:]][::-1]
+    texto = "\n".join(f"{i}. {t}" for i, t in enumerate(ultimas, 1))
+    return f"🎶 {len(items)} canciones. Últimas agregadas:\n{texto}\n\n{link}"
 
 
 def agregar_cancion(consulta):
@@ -51,7 +82,7 @@ def agregar_cancion(consulta):
         return "No encontré esa canción 😕 Intenta con 'artista - canción'."
     video_id = items[0]["id"]["videoId"]
     titulo = html.unescape(items[0]["snippet"]["title"])
-    if video_id in agregadas:
+    if video_id in {v for v, _ in items_playlist(h)}:
         return f"Ya estaba en la playlist: {titulo}"
     a = requests.post(
         "https://www.googleapis.com/youtube/v3/playlistItems",
@@ -66,7 +97,6 @@ def agregar_cancion(consulta):
         timeout=15,
     )
     if a.status_code in (200, 201):
-        agregadas.add(video_id)
         return f"✅ Agregada: {titulo}"
     print("Error YouTube:", a.status_code, a.text)
     return f"No pude agregarla (error {a.status_code})."
@@ -89,9 +119,12 @@ def telegram():
     if not chat_id or not texto:
         return "ok"
     if texto.startswith("/start"):
-        responder(chat_id, "¡Hola! 🎶 Mándame 'artista - canción' y la agrego a la playlist.")
+        responder(chat_id, "¡Hola! 🎶 Mándame 'artista - canción' y la agrego a la playlist. Usa /lista para ver las últimas.")
         return "ok"
     try:
+        if texto.startswith("/lista"):
+            responder(chat_id, lista())
+            return "ok"
         responder(chat_id, agregar_cancion(texto))
     except Exception as e:
         print("Error:", e)
