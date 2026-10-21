@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotiza tu impermeabilización | AislaTerm</title>
+<meta name="description" content="Poliuretano espreado: impermeabilización y aislamiento térmico en Monterrey. Pide tu cotización.">
+<style>
+  :root{--azul:#0d4c8c;--azul2:#0a3a6b;--naranja:#f28c1b;--fondo:#f3f6fa;--texto:#1d2733;--gris:#5f6b7a;--borde:#d5dde7}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fondo);color:var(--texto)}
+  header{background:linear-gradient(135deg,var(--azul),var(--azul2));color:#fff;padding:28px 16px 64px;text-align:center}
+  header h1{margin:0 0 6px;font-size:1.6rem}
+  header p{margin:0;opacity:.9}
+  .marca{font-weight:800;letter-spacing:.5px;font-size:1.1rem;margin-bottom:12px;color:var(--naranja)}
+  main{max-width:520px;margin:-44px auto 32px;padding:0 16px}
+  form,.gracias{background:#fff;border-radius:14px;padding:22px;box-shadow:0 6px 24px rgba(13,76,140,.12)}
+  label{display:block;font-weight:600;margin:14px 0 6px;font-size:.95rem}
+  input,select,textarea{width:100%;padding:12px;border:1px solid var(--borde);border-radius:10px;font-size:1rem;font-family:inherit;background:#fff}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--azul);border-color:transparent}
+  .opciones{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .opciones label{margin:0;font-weight:500;border:1px solid var(--borde);border-radius:10px;padding:10px;display:flex;gap:8px;align-items:center;cursor:pointer}
+  .opciones input{width:auto}
+  .opciones label:has(input:checked){border-color:var(--azul);background:#eaf2fb}
+  .ayuda{color:var(--gris);font-size:.85rem;margin-top:4px}
+  button,.btn{display:block;width:100%;margin-top:20px;padding:14px;border:0;border-radius:10px;background:var(--naranja);color:#fff;font-size:1.05rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+  button:disabled{opacity:.6}
+  .wa{background:#25d366}
+  .error{color:#b42318;margin-top:12px;font-weight:600}
+  .trampa{position:absolute;left:-9999px}
+  .gracias{text-align:center;display:none}
+  .gracias h2{color:var(--azul);margin-top:0}
+  ul.beneficios{list-style:none;padding:0;margin:18px 0 0;color:var(--gris);font-size:.9rem}
+  ul.beneficios li{margin:6px 0}
+  @media (max-width:380px){.opciones{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="marca">AISLATERM</div>
+  <h1>Cotiza tu impermeabilización</h1>
+  <p>Poliuretano espreado · Monterrey y área metropolitana</p>
+</header>
+<main>
+  <form id="f" novalidate>
+    <label for="nombre">Nombre</label>
+    <input id="nombre" name="nombre" autocomplete="name" required maxlength="80">
+
+    <label for="telefono">WhatsApp / teléfono</label>
+    <input id="telefono" name="telefono" type="tel" inputmode="numeric" autocomplete="tel" placeholder="81 1234 5678" required>
+
+    <label for="zona">Municipio</label>
+    <select id="zona" name="zona">
+      <option>Monterrey</option><option>San Nicolás</option><option>Guadalupe</option><option>Apodaca</option>
+      <option>Escobedo</option><option>San Pedro</option><option>Santa Catarina</option><option>García</option>
+      <option>Juárez</option><option>Santiago</option><option>Otro</option>
+    </select>
+
+    <label>¿Qué necesitas?</label>
+    <div class="opciones">
+      <label><input type="radio" name="servicio" value="impermeabilizacion" checked> Impermeabilizar</label>
+      <label><input type="radio" name="servicio" value="aislamiento"> Aislamiento térmico</label>
+      <label><input type="radio" name="servicio" value="ambos"> Las dos</label>
+      <label><input type="radio" name="servicio" value="no_se"> No sé, asesórenme</label>
+    </div>
+
+    <label for="superficie">Tipo de techo</label>
+    <select id="superficie" name="superficie">
+      <option>Losa de concreto</option><option>Lámina</option><option>Muro</option><option>Otro</option>
+    </select>
+
+    <label for="m2">Metros cuadrados aproximados</label>
+    <input id="m2" name="m2" type="number" inputmode="decimal" min="0" placeholder="Ej. 120">
+    <div class="ayuda">Si no sabes, déjalo vacío. Largo × ancho del techo.</div>
+
+    <label for="comentarios">Comentarios (opcional)</label>
+    <textarea id="comentarios" name="comentarios" rows="3" maxlength="500" placeholder="Goteras, calor, tipo de negocio…"></textarea>
+
+    <input class="trampa" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button id="enviar" type="submit">Quiero mi cotización</button>
+    <div id="error" class="error" role="alert"></div>
+
+    <ul class="beneficios">
+      <li>✔ Te contactamos por WhatsApp</li>
+    </ul>
+  </form>
+
+  <div class="gracias" id="gracias">
+    <h2>¡Listo, <span id="nom"></span>!</h2>
+    <p>Recibimos tu solicitud. Te escribimos por WhatsApp en breve.</p>
+    <p>¿Prisa? Escríbenos directo:</p>
+    <a class="btn wa" id="wa" href="https://wa.me/528111851530" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+  </div>
+</main>
+<script>
+  const origen = new URLSearchParams(location.search).get('o') || 'web';
+  const f = document.getElementById('f'), err = document.getElementById('error'), btn = document.getElementById('enviar');
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    err.textContent = '';
+    const datos = Object.fromEntries(new FormData(f).entries());
+    datos.origen = origen;
+    if (datos.nombre.trim().length < 2) { err.textContent = 'Escribe tu nombre.'; return; }
+    if (datos.telefono.replace(/\D/g, '').length < 10) { err.textContent = 'Escribe un teléfono de 10 dígitos.'; return; }
+    btn.disabled = true; btn.textContent = 'Enviando…';
+    try {
+      const r = await fetch('/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos) });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'Error');
+      document.getElementById('nom').textContent = datos.nombre.split(' ')[0];
+      document.getElementById('wa').href = 'https://wa.me/528111851530?text=' +
+        encodeURIComponent('Hola, acabo de pedir cotización en su página. Soy ' + datos.nombre + '.');
+      f.style.display = 'none';
+      document.getElementById('gracias').style.display = 'block';
+      window.scrollTo(0, 0);
+    } catch (x) {
+      err.textContent = x.message === 'Error' ? 'No se pudo enviar. Intenta de nuevo o escríbenos por WhatsApp.' : x.message;
+      btn.disabled = false; btn.textContent = 'Quiero mi cotización';
+    }
+  });
+</script>
+</body>
+</html>
