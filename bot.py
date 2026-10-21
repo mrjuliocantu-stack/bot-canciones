@@ -43,11 +43,14 @@ def _precio(var):
         return 0.0
 
 
+# El poliuretano aísla e impermeabiliza en la misma aplicación: un solo precio por m².
+PRECIO_M2 = _precio("PRECIO_M2")
 PRECIOS = {
-    "impermeabilizacion": _precio("PRECIO_IMPER"),
-    "aislamiento": _precio("PRECIO_AISLANTE"),
+    "impermeabilizacion": _precio("PRECIO_IMPER") or PRECIO_M2,
+    "aislamiento": _precio("PRECIO_AISLANTE") or PRECIO_M2,
+    "ambos": PRECIO_M2 or (_precio("PRECIO_IMPER") + _precio("PRECIO_AISLANTE")),
+    "no_se": PRECIO_M2,
 }
-PRECIOS["ambos"] = PRECIOS["impermeabilizacion"] + PRECIOS["aislamiento"]
 
 SERVICIOS = {
     "impermeabilizacion": "Impermeabilización",
